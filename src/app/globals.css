@@ -1,4 +1,92 @@
-/* global styles */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/app/globals.css */
+@import "tailwindcss";
+
+@theme {
+  /* Greys (UI chrome) */
+  --color-graphite-950: oklch(0.15 0.01 260);
+  --color-graphite-900: oklch(0.20 0.01 260);
+  --color-graphite-800: oklch(0.26 0.01 260);
+  --color-ash-200:      oklch(0.90 0.01 260);
+  --color-ash-100:      oklch(0.95 0.01 260);
+  --color-ash-50:       oklch(0.98 0.01 260);
+
+  /* Brand (neon lime) + Secondary (electric blue) */
+  --color-neon-400: oklch(0.90 0.19 128);
+  --color-neon-500: oklch(0.86 0.21 128);
+  --color-neon-600: oklch(0.78 0.21 128);
+
+  --color-electric-400: oklch(0.78 0.20 258);
+  --color-electric-500: oklch(0.72 0.22 258);
+  --color-electric-600: oklch(0.66 0.22 258);
+
+  /* Status */
+  --color-success-500: oklch(0.74 0.13 145);
+  --color-warning-500: oklch(0.86 0.16 90);
+  --color-danger-500:  oklch(0.64 0.20 25);
+
+  /* Semantic */
+  --color-bg:      var(--color-graphite-950);
+  --color-surface: var(--color-graphite-900);
+  --color-card:    var(--color-ash-50);
+  --color-text:    white;
+  --color-muted:   oklch(0.70 0.02 260);
+  --color-border:  oklch(0.32 0.01 260);
+  --color-brand:   var(--color-neon-500);
+  --color-accent:  var(--color-electric-500);
+
+  /* Spacing / sizes / radius */
+  --spacing-7: 1.75rem;
+  --spacing-9: 2.25rem;
+  --size-container: 72rem;   /* 1152px */
+  --size-narrow:    40rem;   /* 640px */
+  --radius-lg: 0.875rem;
+  --radius-xl: 1rem;
+
+  /* Breakpoints */
+  --breakpoint-compact: 22.5rem; /* 360px */
+  --breakpoint-sm:      36rem;   /* 576px */
+  --breakpoint-md:      48rem;   /* 768px */
+  --breakpoint-lg:      64rem;   /* 1024px */
+  --breakpoint-xl:      80rem;   /* 1280px */
+  --breakpoint-2xl:     96rem;   /* 1536px */
+}
+
+/* Optional light mode */
+:root[data-theme="light"]{
+  --color-bg:      white;
+  --color-surface: var(--color-ash-100);
+  --color-card:    white;
+  --color-text:    oklch(0.20 0.02 260);
+  --color-muted:   oklch(0.45 0.02 260);
+  --color-border:  var(--color-ash-200);
+}
+
+/* Handy global utilities & components */
+/* Utilities and components */
+@layer utilities {
+  .max-w-container { max-width: var(--size-container); }
+  .max-w-narrow    { max-width: var(--size-narrow); }
+}
+
+@layer components {
+  .container { @apply mx-auto w-full px-4; }
+  .card      { @apply rounded-xl border border-[--color-border] bg-[--color-card] p-6; }
+
+  /* Define each button class without @apply .btn */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium
+           text-white bg-brand hover:bg-[--color-neon-600];
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium
+           text-white bg-[--color-accent] hover:bg-[--color-electric-600];
+  }
+
+  .input {
+    @apply w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:border-brand;
+    border-color: var(--color-border);
+  }
+}
+/* bring in your reusable component classes */
+@import "../styles/components/users-form.css";

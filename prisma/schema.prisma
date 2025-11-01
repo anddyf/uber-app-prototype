@@ -1,13 +1,40 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
+  id            String  @id @default(cuid())
+  name          String
+  email         String  @unique
+  createdAt     DateTime @default(now())
+
+  // Opposite sides of the relations (names MUST match the labels in Ride)
+  ridesAsRider  Ride[]  @relation("RiderRides")
+  ridesAsDriver Ride[]  @relation("DriverRides")
+}
+
+model Ride {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+
+  origin       String
+  destination  String
+  priceCents   Int
+
+  // Foreign keys
+  riderId   String
+  driverId  String
+
+  // Relation fields + FK mapping
+  rider   User @relation("RiderRides",  fields: [riderId],  references: [id])
+  driver  User @relation("DriverRides", fields: [driverId], references: [id])
+
+  @@index([riderId])
+  @@index([driverId])
 }
