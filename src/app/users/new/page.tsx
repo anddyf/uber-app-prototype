@@ -1,41 +1,34 @@
-"use client";
+// src/app/users/new/page.tsx
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
+import NewUserClient from "./_client";
+import { isAdmin } from "@/lib/roles";
 
-import { useState } from "react";
+export default async function NewUserPage() {
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as any)?.role as string | undefined;
 
-export default function NewUserPage() {
-  const [message, setMessage] = useState("");
-
-  async function onSubmit(formData: FormData) {
-    const res = await fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: formData.get("name"),
-        email: formData.get("email"),
-      }),
-    });
-    setMessage(res.ok ? "✅ User added!" : "⚠️ Failed");
+  if (!session) {
+    return (
+      <main className="min-h-screen bg-[--color-bg] text-[--color-text]">
+        <section className="container py-12">
+          <p>
+            You must <a className="text-brand underline" href="/signin">sign in</a> to create users.
+          </p>
+        </section>
+      </main>
+    );
   }
 
-  return (
-    <main className="p-10">
-      <h1 className="text-2xl font-bold mb-4">Add New User</h1>
+  if (!isAdmin(role)) {
+    return (
+      <main className="min-h-screen bg-[--color-bg] text-[--color-text]">
+        <section className="container py-12">
+          <p className="text-danger-500">Only admins can create users.</p>
+        </section>
+      </main>
+    );
+  }
 
-      <form action={onSubmit} className="form-card">
-        <div className="form-field">
-          <label className=" text-ash-200">Name</label>
-          <input name="name" className="form-input" placeholder="Jane Doe" />
-        </div>
-
-        <div className="form-field">
-          <label className="form-label">Email</label>
-          <input name="email" className="form-input" placeholder="jane@acme.com" />
-        </div>
-
-        <button type="submit" className="btn-primary">Create User</button>
-
-        {message && <p className="msg-success">{message}</p>}
-      </form>
-    </main>
-  );
+  return <NewUserClient />;
 }
