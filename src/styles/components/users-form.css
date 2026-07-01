@@ -1,0 +1,10 @@
+@reference "tailwindcss";
+
+@layer components {
+  .form-card { @apply space-y-4 p-6 border rounded-xl max-w-[32rem] bg-white; }
+  .form-field { @apply grid gap-2; }
+  .form-label { @apply text-sm font-medium text-gray-700; }
+  .form-input { @apply border rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500; }
+  .btn-primary { @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800; }
+  .msg-success { @apply mt-2 text-sm text-green-600; }
+}
