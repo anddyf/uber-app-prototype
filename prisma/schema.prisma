@@ -4,7 +4,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+<<<<<<< HEAD
   url      = env("DATABASE_URL")
+=======
+>>>>>>> master
 }
 
 enum Role {
