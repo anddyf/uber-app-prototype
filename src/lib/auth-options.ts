@@ -17,14 +17,14 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(creds) {
-        const email = String(creds?.email || "").toLowerCase().trim();
-        const pw = String(creds?.password || "");
-        const user = await db.user.findUnique({ where: { email } });
-        if (!user || !user.passwordHash) return null;
-        const ok = await bcrypt.compare(pw, user.passwordHash);
-        return ok ? { id: user.id, email: user.email, name: user.name } : null;
-      },
+async authorize(creds) {
+      const email = String(creds?.email || "").toLowerCase().trim();
+      const pw = String(creds?.password || "");
+      const user = await db.user.findUnique({ where: { email } });
+      if (!user || !user.passwordHash) return null;
+      const ok = await bcrypt.compare(pw, user.passwordHash);
+      return ok ? { id: user.id, email: user.email, name: user.name, role: user.role } : null;
+    },
     }),
 
     // If you haven't set GOOGLE_CLIENT_ID/SECRET yet, remove/comment Google:

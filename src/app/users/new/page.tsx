@@ -8,6 +8,9 @@ export default async function NewUserPage() {
   const session = await getServerSession(authOptions);
   const role = (session?.user as any)?.role as string | undefined;
 
+  console.log("SESSION USER:", session?.user);
+  console.log("ROLE VALUE:", role, "| isAdmin result:", isAdmin(role));
+
   if (!session) {
     return (
       <main className="min-h-screen bg-[--color-bg] text-[--color-text]">

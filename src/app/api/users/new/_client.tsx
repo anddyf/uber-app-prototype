@@ -18,7 +18,6 @@ export default function NewUserClient() {
     const name = String(formData.get("name") || "").trim();
     const email = String(formData.get("email") || "").trim().toLowerCase();
     const password = String(formData.get("password") || "");
-    const role = String(formData.get("role") || "RIDER");
 
     const nextErrors: typeof errors = {};
     if (!name) nextErrors.name = "Name is required";
@@ -40,7 +39,7 @@ export default function NewUserClient() {
     const res = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password }),
     });
 
     setSubmitting(false);
@@ -136,17 +135,6 @@ export default function NewUserClient() {
                 {errors.password}
               </p>
             )}
-          </div>
-
-          <div className="grid gap-2">
-            <label htmlFor="role" className="text-sm text-[--color-muted]">
-              Role
-            </label>
-            <select id="role" name="role" defaultValue="RIDER" className="input">
-              <option value="RIDER">Rider</option>
-              <option value="DRIVER">Driver</option>
-              <option value="ADMIN">Admin</option>
-            </select>
           </div>
 
           <button type="submit" className="btn-primary" disabled={submitting}>
