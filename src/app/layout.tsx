@@ -8,6 +8,8 @@ import ProfileMenu from "@/components/ProfileMenu";
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
+  console.log(session)
+
   return (
     <html lang="en">
       <body className="bg-[--color-bg] text-[--color-text]">
@@ -23,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {session ? (
             <ProfileMenu
               label={(session.user?.name ?? session.user?.email) || "User"}
-              role={(session.user as any)?.role}
+              role={session.user?.role}
             />
           ) : (
             <a className="btn-primary" href="/signin">Sign in</a>

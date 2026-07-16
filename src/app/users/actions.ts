@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 
+
 export async function deleteUser(id: string) {
   if (!id) return;
 
@@ -14,7 +15,7 @@ export async function deleteUser(id: string) {
 
   // 2) Look up *fresh* role from DB (don’t trust possibly-stale JWT)
   const me = await db.user.findUnique({
-    where: { id: (session.user as any)?.id ?? "" }, // or use email if you didn't wire id
+    where: { id: session.user?.id ?? "" }, // or use email if you didn't wire id
     select: { role: true },
   });
 

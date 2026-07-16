@@ -8,27 +8,36 @@ type Scope = "all" | "rider" | "driver";
 export default async function RidesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ scope?: Scope }>;
+  searchParams: Promise<{ scope?: Scope, page: string }> ;
 }) {
   const session = await getServerSession(authOptions);
-  const userId = (session?.user as any)?.id as string | undefined;
-
+  const userId = session?.user?.id as string | undefined;
   // 👇 unwrap the promise
   const sp = await searchParams;
   const scope = (sp?.scope ?? "all") as Scope;
-
+  const pageSize = 5;
+  const page = Number(sp?.page) || 1;
+  const skip = (page - 1) * pageSize;
   const where =
     scope === "rider" && userId ? { riderId: userId } :
     scope === "driver" && userId ? { driverId: userId } :
     {};
 
+  const totalCount = await db.ride.count({ where });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+
   const rides = await db.ride.findMany({
     where,
     orderBy: { createdAt: "desc" },
     include: { rider: true, driver: true },
+    take:5,
+    skip: skip,
   });
 
-  const Tab = ({ href, label, active }: { href: string; label: string; active: boolean }) => (
+
+  const Tab = ({ href, label, active }: { href: string; label: string; active: boolean; page: number }) => (
     <a
       href={href}
       className={`px-3 py-2 rounded-md border ${
@@ -61,13 +70,12 @@ export default async function RidesPage({
                 <div>
                   <div className="font-semibold">{r.origin} → {r.destination}</div>
                   <div className="text-[--color-muted] text-sm">
-                    Rider: {r.rider?.name ?? "(deleted)"} • Driver: {r.driver?.name ?? "(deleted)"}
-                  </div>
+                    Rider: {r.rider?.name ?? "(deleted)"} • Driver: {r.driver?.name ?? "(deleted)"}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="font-semibold">${(r.priceCents / 100).toFixed(2)}</div>
                   <form action={async () => { "use server"; const { deleteRide } = await import("./actions"); await deleteRide(r.id); }}>
-                    <button type="submit" className="btn-accent">Delete</button>
+                    <button type="submit" className="border-2 rounded px-3 py-1 cursor-pointer">Delete</button>
                   </form>
                 </div>
               </div>
@@ -75,6 +83,10 @@ export default async function RidesPage({
           ))}
           {rides.length === 0 && <p className="text-[--color-muted]">No rides found for this filter.</p>}
         </div>
+           <div className="flex gap-2 mt-6">
+            {page > 1 && <a href={`/rides?scope=${scope}&page=${page - 1}`}>Previous</a>}
+            {page < totalPages && <a href={`/rides?scope=${scope}&page=${page + 1}`}>Next</a>}
+          </div>
       </section>
     </main>
   );

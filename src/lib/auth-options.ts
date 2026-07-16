@@ -38,19 +38,19 @@ async authorize(creds) {
 
   // (optional) include a JWT callback to attach more fields
     callbacks: {
-    async jwt({ token, user }) {
+      async jwt({ token, user }) {
         if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;  // <-- include role
+          token.id = user.id;
+          token.role = user.role;
         }
         return token;
-    },
-    async session({ session, token }) {
+      },
+      async session({ session, token }) {
         if (session.user) {
-        (session.user as any).id = token.id as string;
-        (session.user as any).role = token.role as string;  // <-- expose role
+          session.user.id = token.id;
+          session.user.role = token.role;
         }
         return session;
-    },
+      },
     },
 };

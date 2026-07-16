@@ -1,21 +1,44 @@
 import { db } from "@/lib/db";
 import { deleteUser } from "./actions";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
 
 export default async function UsersPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return (
+      <main className="p-10">
+        <a className="btn-primary" href="/signin">Sign in</a>
+      </main>
+    );
+  }
+
+  const me = await db.user.findUnique({
+    where: { id: session.user?.id ?? "" },
+    select: { role: true },
+  });
+
+  if (!me || me.role !== "ADMIN") {
+    return (
+      <main className="p-10">
+        <p>You are not authorized to view this page.</p>
+      </main>
+    );
+  }
+
   const users = await db.user.findMany({ orderBy: { createdAt: "desc" } });
 
   return (
-    <main className="p-10">
-      <h1 className="text-2xl font-bold mb-4">All Users</h1>
+      <main className="p-10">
 
       <ul className="space-y-2">
         {users.map((u) => (
+
           <li key={u.id} className="border p-2 rounded flex items-center justify-between">
             <div>
               <strong>{u.name}</strong> — {u.email}
             </div>
-
-            {/* A tiny form that calls the server action */}
+            
             <form
               action={async () => {
                 "use server";

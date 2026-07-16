@@ -1,6 +1,6 @@
 import "dotenv/config";
 console.log("DATABASE_URL loaded:", !!process.env.DATABASE_URL);
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 

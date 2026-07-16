@@ -18,6 +18,8 @@ export default function NewRideClient() {
   const [users, setUsers] = useState<U[]>([]);
   const [message, setMessage] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submission, setSubmission ] = useState<Boolean>(false);
+  const [id, setId ] = useState<Number>(1);
 
   useEffect(() => {
     fetch("/api/users/list")
@@ -26,26 +28,30 @@ export default function NewRideClient() {
       .catch(() => setUsers([]));
   }, []);
 
-  async function onSubmit(formData: FormData) {
-    setErrors({});
-    setMessage("");
+ async function onSubmit(formData: FormData) {
+  setErrors({});
+  setMessage("");
+  setSubmission(true);
+  setId(prev => prev + 1);
 
-    const raw = {
-      origin: String(formData.get("origin") || ""),
-      destination: String(formData.get("destination") || ""),
-      priceCents: formData.get("priceCents"),
-      riderId: String(formData.get("riderId") || ""),
-      driverId: String(formData.get("driverId") || ""),
-    };
+  const raw = {
+    origin: String(formData.get("origin") || ""),
+    destination: String(formData.get("destination") || ""),
+    priceCents: formData.get("priceCents"),
+    riderId: String(formData.get("riderId") || ""),
+    driverId: String(formData.get("driverId") || ""),
+  };
 
-    const parsed = RideSchema.safeParse(raw);
+  const parsed = RideSchema.safeParse(raw);
+
+  try {
     if (!parsed.success) {
       const fieldErrors: Record<string, string> = {};
       for (const [k, v] of Object.entries(parsed.error.flatten().fieldErrors)) {
         if (v && v[0]) fieldErrors[k] = v[0];
       }
       setErrors(fieldErrors);
-      return;
+      return; // finally below still runs, resetting submission
     }
 
     const res = await fetch("/api/rides", {
@@ -61,7 +67,11 @@ export default function NewRideClient() {
       const text = await res.text().catch(() => "");
       setMessage(`⚠️ ${text || "Failed to create"}`);
     }
+  } finally {
+    setSubmission(false); // ALWAYS runs: validation failure, success, or fetch failure
   }
+}
+
 
   return (
     <main className="min-h-screen bg-[--color-bg] text-[--color-text]">
@@ -74,7 +84,6 @@ export default function NewRideClient() {
             <input name="origin" className="input" placeholder="123 Main St" />
             {errors.origin && <p className="text-danger-500 text-sm">{errors.origin}</p>}
           </div>
-
           <div className="grid gap-2">
             <label className="text-sm text-[--color-muted]">Destination</label>
             <input name="destination" className="input" placeholder="456 Park Ave" />
@@ -113,7 +122,7 @@ export default function NewRideClient() {
             {errors.driverId && <p className="text-danger-500 text-sm">{errors.driverId}</p>}
           </div>
 
-          <button type="submit" className="btn-primary">Create Ride</button>
+          <button  disabled={submission ? true : false}  type="submit" className="btn-primary">Create Ride</button>
           {message && <p className="text-success-500">{message}</p>}
         </form>
       </section>
