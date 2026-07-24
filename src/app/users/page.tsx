@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
-import { deleteUser } from "./actions";
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
+import UsersListClient  from "../../components/UsersListClient";
 
 export default async function UsersPage() {
   const session = await getServerSession(authOptions);
@@ -26,35 +27,14 @@ export default async function UsersPage() {
     );
   }
 
-  const users = await db.user.findMany({ orderBy: { createdAt: "desc" } });
+  const users = await db.user.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, name: true, email: true }, // exactly what UsersListClient's `U` type needs — nothing more, nothing less
+  });
 
   return (
       <main className="p-10">
-
-      <ul className="space-y-2">
-        {users.map((u) => (
-
-          <li key={u.id} className="border p-2 rounded flex items-center justify-between">
-            <div>
-              <strong>{u.name}</strong> — {u.email}
-            </div>
-            
-            <form
-              action={async () => {
-                "use server";
-                await deleteUser(u.id);
-              }}
-            >
-              <button
-                type="submit"
-                className="text-sm rounded px-3 py-1 border hover:bg-gray-50"
-              >
-                Delete
-              </button>
-            </form>
-          </li>
-        ))}
-      </ul>
+      <UsersListClient users={users} />
     </main>
   );
 }
