@@ -92,3 +92,9 @@ else {
   //    - CANCELLED -> rider, driver, or admin
   // 6) If both pass, update the ride's status
 }
+
+// in src/app/rides/actions.ts - add a new export
+export async function updateRideStatusFromForm(rideId: string, formData: FormData) {
+  const newStatus = formData.get("status") as RideStatus;
+  await updateRideStatus(rideId, newStatus);
+}

@@ -1,9 +1,7 @@
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import type { RideStatus } from "@prisma/client";
-import { canTransition } from "@/lib/rideStatus";
-import { deleteRide, updateRideStatus } from "./actions";
+import RidesListClient from "@/components/RidesListClient";
 
 type Scope = "all" | "rider" | "driver";
 
@@ -42,10 +40,6 @@ export default async function RidesPage({
     skip: skip,
   });
 
-function allowNextStatus(e: React.ChangeEvent<HTMLInputElement>){
-      console.log(e)
- }
-
   const Tab = ({ href, label, active }: { href: string; label: string; active: boolean; page: number }) => (
     <a
       href={href}
@@ -72,57 +66,12 @@ function allowNextStatus(e: React.ChangeEvent<HTMLInputElement>){
           <Tab href="/rides?scope=driver" label="My rides (driver)" active={scope === "driver"} />
         </div>
 
-        <div className="grid gap-4">
-          { rides.map((r) => {
-              const isDriverOfThisRide = userId === r.driverId;
-              const isRiderOfThisRide = userId === r.riderId;
 
-              if(isDriverOfThisRide || isRiderOfThisRide || isAdmin ){
-
-                  const allStatuses: RideStatus[] = ["REQUESTED", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
-console.log("RIDE STATUS VALUE:", r.rideStatus, "| Full ride keys:", Object.keys(r));
-                  const allowedNextStatuses = allStatuses.filter((candidate) => {
-                    const transitionValid = canTransition(r.rideStatus, candidate);
-                    const authorized = candidate === "CANCELLED"
-                      ? (isAdmin || isDriverOfThisRide || isRiderOfThisRide)
-                      : (isAdmin || isDriverOfThisRide);
-                    return transitionValid && authorized;
-                  });
-                return (
-                        <article key={r.id} className="card">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-semibold">{r.origin} → {r.destination}</div>
-                              <div className="text-[--color-muted] text-sm">
-                                Rider: {r.rider?.name ?? "(deleted)"} • Driver: {r.driver?.name ?? "(deleted)"}</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="font-semibold">${(r.priceCents / 100).toFixed(2)}</div>
-                              <form action={async () => { "use server"; await deleteRide(r.id); }}>
-                                <button type="submit" className="border-2 rounded px-3 py-1 cursor-pointer">Delete</button>
-                              </form>
-                              <form action={async (formData: FormData) => {
-                                "use server";
-                                const newStatus = formData.get("status") as RideStatus;
-                                
-                                await updateRideStatus(r.id, newStatus);
-                              }}>
-                                <select name="status" defaultValue="">
-                              {allowedNextStatuses.map((status) => (
-                                <option key={status} value={status}>{status}</option>
-                              ))}
-                                </select>
-                                <button type="submit">Update</button>
-                              </form>
-                            </div>
-                          </div>
-                        </article>
-                      )
-              }
-            }
-          )}
-          {rides.length === 0 && <p className="text-[--color-muted]">No rides found for this filter.</p>}
-        </div>
+        <RidesListClient
+          initialRides={rides}
+          userId={userId}
+          isAdmin={isAdmin}
+        />
            <div className="flex gap-2 mt-6">
             {page > 1 && <a href={`/rides?scope=${scope}&page=${page - 1}`}>Previous</a>}
             {page < totalPages && <a href={`/rides?scope=${scope}&page=${page + 1}`}>Next</a>}
