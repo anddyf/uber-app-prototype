@@ -12,6 +12,12 @@ enum Role {
   RIDER
 }
 
+enum RideStatus {
+  REQUESTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
 
 model User {
   id            String   @id @default(cuid())
@@ -40,6 +46,7 @@ model Ride {
   destination  String
   priceCents   Int
   riderId      String
+  rideStatus   RideStatus @default(REQUESTED)
   driverId     String
   rider        User     @relation("RiderRides",  fields: [riderId],  references: [id])
   driver       User     @relation("DriverRides", fields: [driverId], references: [id])

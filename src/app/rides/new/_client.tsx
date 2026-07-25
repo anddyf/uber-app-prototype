@@ -33,7 +33,7 @@ export default function NewRideClient() {
   setMessage("");
   setSubmission(true);
   setId(prev => prev + 1);
-
+  
   const raw = {
     origin: String(formData.get("origin") || ""),
     destination: String(formData.get("destination") || ""),
